@@ -1,2 +1,2 @@
 make: ray.cpp
-	gcc -o ray ray.cpp -lraylib -I.
+	g++ -o ray ray.cpp -lraylib -I.
