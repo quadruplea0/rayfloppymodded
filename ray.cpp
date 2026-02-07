@@ -10,6 +10,8 @@
 *   Copyright (c) 2015 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
+#include <iostream>
+#include<fstream>
 
 #include "raylib.h"
 
@@ -29,6 +31,7 @@
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
+
 typedef enum GameState {
     MENU = 0,
     PLAYING = 1,
@@ -93,6 +96,8 @@ int main(void)
 
     InitGame();
 
+    
+
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 #else
@@ -128,6 +133,10 @@ void InitGame(void)
     floppy.position = (Vector2){80, screenHeight/2 - floppy.radius};
     floppy.velocity = 0.0f;
     tubesSpeedX = 3.2;
+
+    std::ifstream highscorefile("highscore.txt");
+    highscorefile >> hiScore;
+    highscorefile.close();
 
     for (int i = 0; i < MAX_TUBES; i++)
     {
@@ -167,6 +176,8 @@ void InitGame(void)
 
     superfx = false;
     pause = false;
+
+    
 }
 
 // Update game (one frame)
@@ -239,6 +250,11 @@ void UpdateGame(void)
                     superfx = true;
 
                     if (score > hiScore) hiScore = score;
+
+                    std::ofstream highscorefile;
+                    highscorefile.open("highscore.txt");
+                    highscorefile << hiScore;
+                    highscorefile.close();
                 }
             }
 
@@ -255,7 +271,7 @@ void UpdateGame(void)
     }
     else if (gameState == GAME_OVER)
     {
-        if (IsKeyPressed(KEY_ENTER))
+        if (IsKeyPressed(KEY_ENTER) or IsKeyPressed(KEY_SPACE))
         {
             gameState = MENU;
         }
@@ -311,7 +327,7 @@ void DrawGame(void)
             DrawText(TextFormat("Score: %04i", score), screenWidth/2 - MeasureText(TextFormat("Score: %04i", score), 40)/2, 200, 40, GRAY);
             DrawText(TextFormat("Coins: %04i", coinsCollected), screenWidth/2 - MeasureText(TextFormat("Coins: %04i", coinsCollected), 40)/2, 240, 40, GOLD);
             DrawText(TextFormat("High Score: %04i", hiScore), screenWidth/2 - MeasureText(TextFormat("High Score: %04i", hiScore), 40)/2, 280, 40, GRAY);
-            DrawText("Press ENTER to return to menu", screenWidth/2 - MeasureText("Press ENTER to return to menu", 20)/2, 380, 20, LIGHTGRAY);
+            DrawText("Press ENTER or SPACE to return to menu", screenWidth/2 - MeasureText("Press ENTER or SPACE to return to menu", 20)/2, 380, 20, LIGHTGRAY);
         }
 
     EndDrawing();
