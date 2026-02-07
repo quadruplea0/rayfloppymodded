@@ -25,7 +25,7 @@
 #define MAX_TUBES 100
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 70
-#define MAX_COINS 30
+#define MAX_COINS 500
 #define COIN_RADIUS 8
 
 //----------------------------------------------------------------------------------
@@ -68,12 +68,13 @@ static bool pause = false;
 static int score = 0;
 static int hiScore = 0;
 static int coinsCollected = 0;
+static int tubesPassed = 0;
 
-static Floppy floppy = { 0 };
+static Floppy floppy = { 0 }; 
 static Tubes tubes[MAX_TUBES*2] = { 0 };
 static Vector2 tubesPos[MAX_TUBES] = { 0 };
 static Coin coins[MAX_COINS] = { 0 };
-static int tubesSpeedX = 0;
+static float tubesSpeedX = 0;
 static bool superfx = true;
 
 //------------------------------------------------------------------------------------
@@ -133,6 +134,7 @@ void InitGame(void)
     floppy.position = (Vector2){80, screenHeight/2 - floppy.radius};
     floppy.velocity = 0.0f;
     tubesSpeedX = 3.2;
+    tubesPassed = 0;
 
     std::ifstream highscorefile("highscore.txt");
     highscorefile >> hiScore;
@@ -183,6 +185,8 @@ void InitGame(void)
 // Update game (one frame)
 void UpdateGame(void)
 {
+    printf("%f\n", tubesSpeedX);
+
     if (gameState == MENU)
     {
         if (IsKeyPressed(KEY_SPACE))
@@ -191,6 +195,9 @@ void UpdateGame(void)
             gameState = PLAYING;
         }
     }
+
+    
+
     else if (gameState == PLAYING)
     {
         if (IsKeyPressed('P')) pause = !pause;
@@ -249,12 +256,19 @@ void UpdateGame(void)
 
                     superfx = true;
 
+                    tubesPassed++;
+                    if ((tubesPassed % 3) == 0) {
+                        float speedIncrease = 0.5f / (1.0f + (tubesPassed / 6.0f));
+                        tubesSpeedX += speedIncrease;
+                    }
+
                     if (score > hiScore) hiScore = score;
 
                     std::ofstream highscorefile;
                     highscorefile.open("highscore.txt");
                     highscorefile << hiScore;
                     highscorefile.close();
+
                 }
             }
 
@@ -267,6 +281,8 @@ void UpdateGame(void)
                     coinsCollected++;
                 }
             }
+
+            
         }
     }
     else if (gameState == GAME_OVER)
